@@ -19,21 +19,23 @@ def connection_control (client):
     # need to encrypt the connection between the server and the database
 
     # hashes the password so it can match to the database
-    password = hashlib.sha256(password).hexdigest()
+    password = hashlib.sha256(password.encode()).hexdigest()
 
-    conn = sqlite3.connect("login_information.db")
+    conn = sqlite3.connect("login_information.db") #changed to users because create databases doesnt have login information
     cursor = conn.cursor()
 
     # requires protection from SQL injection
     cursor.execute("SELECT * FROM login_information WHERE username = ? AND password = ?", (username, password))
 
     if cursor.fetchall():
-        cursor.send("login accepted".encode())
+        print("Login accepted")
+        client.send("login accepted".encode()) #changed from 'cursor' to 'client'
 
         # controls access to rest of calendar
         
     else:
-        cursor.send("iinvalid login".encode())
+        print("Login not accepted")
+        client.send("invalid login".encode()) #changed from 'cursor' to 'client'
 
 
 while True:

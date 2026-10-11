@@ -1,6 +1,13 @@
 import sqlite3
 import hashlib
 
+from dynamodb_events import (
+    create_event,
+    get_event,
+    get_events_for_calendar
+)
+
+
 ###=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=###
 ###             FUNCTIONS             ###
 ###=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=###
@@ -29,6 +36,7 @@ def init_linked_databases():
     cursor.execute("""CREATE TABLE IF NOT EXISTS user_calendars (calendar_id INTEGER PRIMARY KEY, name VARCHAR(255) NOT NULL, timezone VARCHAR(128) NOT NULL)""")
 
     conn.commit()
+
 
     return()
 
@@ -109,6 +117,16 @@ def first_login():
     cursor = conn.cursor()
     cursor.execute("INSERT INTO user_calendar_link (user_id, calendar_id) VALUES (?, ?)", (user_id_temp, calendar_id_temp))
     conn.commit()
+
+    # initialize dynamodb calendar for user with a placeholder event
+    create_event(
+        calendar_id=calendar_id_temp,
+        event_id=f"welcome-event-{calendar_id_temp}",
+        name="Welcome to your calendar!",
+        date="2026-10-12T14:00:00",
+        description="This is a sample event",
+        difficulty=1
+    )
 
     return()
 
